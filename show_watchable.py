@@ -52,8 +52,9 @@ def run():
             table_data[provider_name].append(f"{movie['name']} ({movie['year']})")
 
     for service, titles in table_data.items():
-        if service.lower() not in config.providers:
+        if config.providers and service.lower() not in config.providers:
             continue
+
         print(stylize('----------------------------', GOOD))
         print(
             stylize(
