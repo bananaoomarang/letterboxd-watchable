@@ -1,6 +1,7 @@
-from pprint import pprint
-
 import requests
+
+import colored
+from colored import stylize
 
 from config import config
 
@@ -11,12 +12,18 @@ HEADERS = {
     "Authorization": f"Bearer {config.tmdb_api_key}"
 }
 
+ERROR = colored.fg("red") + colored.attr("bold")
+GOOD = colored.fg("white") + colored.attr("bold")
+GREEN = colored.fg("green") + colored.attr("bold")
+
 
 def run():
     conn = db.get_conn()
     c = conn.cursor()
     c.execute("SELECT * FROM cinemas")
     movies = c.fetchall()
+
+    table_data = {}
 
     for movie in movies:
         url = f"{TMDB_API}/3/movie/{movie['tmdb_id']}/watch/providers"
@@ -26,7 +33,9 @@ def run():
         )
 
         if res.status_code != 200:
-            print(f"Could not find {movie['name']} (ID: {movie['tmdb_id']})")
+            print(
+                stylize(f"Could not find {movie['name']} (ID: {movie['tmdb_id']})", ERROR)
+            )
             continue
 
         results = res.json()["results"]
@@ -35,9 +44,27 @@ def run():
         if not providers:
             continue
 
+        for provider in providers:
+            provider_name = provider["provider_name"].lower().title()
+
+            if not table_data.get(provider_name, None):
+                table_data[provider_name] = []
+            table_data[provider_name].append(f"{movie['name']} ({movie['year']})")
+
+    for service, titles in table_data.items():
+        if service.lower() not in config.providers:
+            continue
+        print(stylize('----------------------------', GOOD))
+        print(
+            stylize(
+                f"Available on {service}:",
+                GOOD
+            )
+        )
+        print(stylize('----------------------------', GOOD))
+        for title in titles:
+            print(stylize(title, GREEN))
         print()
-        print(f"{len(providers)} flatrate providers for {movie['name']} ({movie['year']}):")
-        print([provider["provider_name"] for provider in providers])
 
 
 if __name__ == "__main__":

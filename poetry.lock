@@ -15,6 +15,14 @@ optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [[package]]
+name = "colored"
+version = "1.4.2"
+description = "Simple library for color and formatting to terminal"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "dataclasses"
 version = "0.8"
 description = "A backport of the dataclasses module for Python 3.6"
@@ -91,7 +99,7 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.6"
-content-hash = "6baee9f5c9d47b200276dfc369155002aeba8134cd5fe5ce15bc7f956f3d42ba"
+content-hash = "0085ee70d2fa60c90b23b1154766d4802c23c11f4111e4b097392e6accfbf605"
 
 [metadata.files]
 certifi = [
@@ -101,6 +109,9 @@ certifi = [
 chardet = [
     {file = "chardet-4.0.0-py2.py3-none-any.whl", hash = "sha256:f864054d66fd9118f2e67044ac8981a54775ec5b67aed0441892edb553d21da5"},
     {file = "chardet-4.0.0.tar.gz", hash = "sha256:0d6f53a15db4120f2b08c94f11e7d93d2c911ee118b6b30a04ec3ee8310179fa"},
+]
+colored = [
+    {file = "colored-1.4.2.tar.gz", hash = "sha256:056fac09d9e39b34296e7618897ed1b8c274f98423770c2980d829fd670955ed"},
 ]
 dataclasses = [
     {file = "dataclasses-0.8-py3-none-any.whl", hash = "sha256:0201d89fa866f68c8ebd9d08ee6ff50c0b255f8ec63a71c16fda7af82bb887bf"},
