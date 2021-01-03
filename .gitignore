@@ -110,3 +110,5 @@ tmp/
 .vscode
 
 .DS_Store
+/data
+/pyrightconfig.json
