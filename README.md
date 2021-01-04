@@ -12,7 +12,7 @@ LBOX_PASSWORD=yourletterboxdpassword
 LBOX_TMDB_API_KEY=your-tmdb-api-key
 ```
 
-To get a TMDB API key you need a (free) account and to request on on the account settings page (see docs)[https://developers.themoviedb.org/3/getting-started/introduction].
+To get a TMDB API key you need a (free) account and to request on on the account settings page [see docs](https://developers.themoviedb.org/3/getting-started/introduction).
 
 You may also want to customise the providers list in `config.py` as this is tedious to specify as an environment variable. To show all providers just make it a blank list like:
 

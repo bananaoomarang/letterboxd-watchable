@@ -8,12 +8,13 @@ update your watchlist by signing into your letterboxd account and exporting your
 
 import csv
 import re
-
 import os
 import sqlite3
 
-import zipfile
+import colored
+from colored import stylize
 import requests
+import zipfile
 
 from letterboxd_watchable import db
 
@@ -49,8 +50,18 @@ def _get_id(row: dict) -> str:
 
 def _resolve_tmdb(uri: str):
     res = requests.get(uri)
-    tmdb_id = re.search(r'data-tmdb-id="\d+"', res.text).group(0)
-    tmdb_id = tmdb_id.split("=")[-1]
+    tmdb_id = re.search(r'data-tmdb-id="\d+"', res.text)
+
+    if not tmdb_id:
+        print(
+            stylize(
+                f"Could not find TMBD for page {uri}",
+                colored.fg("red") + colored.attr("bold")
+            )
+        )
+        return None
+
+    tmdb_id = tmdb_id.group(0).split("=")[-1]
     return "".join(tmdb_id.split('"'))
 
 
