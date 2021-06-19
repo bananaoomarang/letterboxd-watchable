@@ -139,6 +139,7 @@ def extract_watchlist():
     zip_file = os.path.join(MY_PATH, ZIP_FILE)
     with zipfile.ZipFile(zip_file, 'r') as zip_ref:
         zip_ref.extract(WATCHLIST_CSV, path=os.path.join(MY_PATH, DATA))
+    os.remove(zip_file)
 
 def extract_watched():
     zip_file = os.path.join(MY_PATH, ZIP_FILE)
