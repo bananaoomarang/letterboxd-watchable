@@ -35,6 +35,7 @@ SIGN_IN_PW_EL = "password"
 COOKIE_NAME = "com.xk72.webparts.csrf"
 ZIP_FILE = "data/lb_data.zip"
 WATCHLIST_CSV = "watchlist.csv"
+WATCHED_CSV = "watched.csv"
 DATA = "data/"
 WATCHLIST_TXT = "data/watchlist.txt"
 
@@ -74,14 +75,14 @@ def _upsert_row(conn: sqlite3.Connection, row: dict):
                 tmdb_id,
                 name,
                 year,
-                add_date
+                add_date,
+                watched
             )
-            VALUES(?, ?, ?, ?, ?)
+            VALUES(?, ?, ?, ?, ?, ?)
             ON CONFLICT DO NOTHING
             """,
-            (_get_id(row), _resolve_tmdb(row["Letterboxd URI"]), row["Name"], row["Year"], row["Date"])
+            (_get_id(row), _resolve_tmdb(row["Letterboxd URI"]), row["Name"], row["Year"], row["Date"], 0)
         )
-
 
 def process_watchlist():
     watchlist_csv = os.path.join(MY_PATH, f"{DATA}{WATCHLIST_CSV}")
@@ -100,7 +101,8 @@ CREATE TABLE IF NOT EXISTS cinemas(
     tmdb_id INT,
     name TEXT,
     year INT,
-    add_date TEXT
+    add_date TEXT,
+    watched INT
 )
             """
         )
@@ -116,6 +118,11 @@ def extract_watchlist():
     zip_file = os.path.join(MY_PATH, ZIP_FILE)
     with zipfile.ZipFile(zip_file, 'r') as zip_ref:
         zip_ref.extract(WATCHLIST_CSV, path=os.path.join(MY_PATH, DATA))
+
+def extract_watched():
+    zip_file = os.path.join(MY_PATH, ZIP_FILE)
+    with zipfile.ZipFile(zip_file, 'r') as zip_ref:
+        zip_ref.extract(WATCHED_CSV, path=os.path.join(MY_PATH, DATA))
     os.remove(zip_file)
 
 
@@ -146,6 +153,7 @@ def update_watchlist():
     os.makedirs(DATA, exist_ok=True)
     download_letterboxd_content()
     extract_watchlist()
+    extract_watched()
     process_watchlist()
 
 if __name__ == "__main__":
