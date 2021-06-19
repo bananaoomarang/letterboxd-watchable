@@ -49,7 +49,7 @@ def run():
 
             if not table_data.get(provider_name, None):
                 table_data[provider_name] = []
-            table_data[provider_name].append(f"{movie['name']} ({movie['year']}) {'** Seen this! **' if movie['watched'] else ''}")
+            table_data[provider_name].append(f"{movie['name']} ({movie['year']}) {watched_text() if movie['watched'] else ''}")
 
     for service, titles in table_data.items():
         if config.providers and service.lower() not in config.providers:
@@ -67,12 +67,8 @@ def run():
             print(stylize(title, GREEN))
         print()
 
-def watched_text(isWatched):
-    if isWatched == 1:
-        "X"
-    else:
-        ""
-
+def watched_text():
+    return "** Seen it! **"
 
 if __name__ == "__main__":
     run()
