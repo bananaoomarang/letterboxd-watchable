@@ -84,11 +84,29 @@ def _upsert_row(conn: sqlite3.Connection, row: dict):
             (_get_id(row), _resolve_tmdb(row["Letterboxd URI"]), row["Name"], row["Year"], row["Date"], 0)
         )
 
+
+def _update_row(conn: sqlite3.Connection, row: dict):
+    with conn:
+        conn.execute(
+            """
+            UPDATE Cinemas
+            SET watched = 1
+            WHERE name = ?
+            """,
+            (row["Name"],)
+        )
+
+
 def process_watchlist():
     watchlist_csv = os.path.join(MY_PATH, f"{DATA}{WATCHLIST_CSV}")
     with open(watchlist_csv, newline='') as f:
         reader = csv.DictReader(f)
-        rows = list(reader)
+        watchlist_rows = list(reader)
+
+    watched_csv = os.path.join(MY_PATH, f"{DATA}{WATCHED_CSV}")
+    with open(watched_csv, newline='') as f:
+        reader = csv.DictReader(f)
+        watched_rows = list(reader)
 
 
     conn = db.get_conn()
@@ -107,9 +125,12 @@ CREATE TABLE IF NOT EXISTS cinemas(
             """
         )
 
-    for row in rows:
+    for row in watchlist_rows:
         print(f"processing {row['Name']} ({row['Year']})")
         _upsert_row(conn, row)
+
+    for row in watched_rows:
+        _update_row(conn, row)
 
     conn.close()
 
