@@ -49,7 +49,7 @@ def run():
 
             if not table_data.get(provider_name, None):
                 table_data[provider_name] = []
-            table_data[provider_name].append(f"{movie['name']} ({movie['year']}) {watched_text() if movie['watched'] else ''}")
+            table_data[provider_name].append(f"{movie['name']} ({movie['year']}) {watched_text() if movie['watched'] else ''} {rated_text(movie['rated']) if movie['rated'] else '' }")
 
     for service, titles in table_data.items():
         if config.providers and service.lower() not in config.providers:
@@ -68,7 +68,12 @@ def run():
         print()
 
 def watched_text():
-    return "** Seen it! **"
+    return "Seen it!"
+
+def rated_text(rating):
+    popcorns = "\U0001F600" * rating
+    return popcorns
+
 
 if __name__ == "__main__":
     run()
