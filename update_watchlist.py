@@ -35,6 +35,8 @@ SIGN_IN_PW_EL = "password"
 COOKIE_NAME = "com.xk72.webparts.csrf"
 ZIP_FILE = "data/lb_data.zip"
 WATCHLIST_CSV = "watchlist.csv"
+WATCHED_CSV = "watched.csv"
+RATINGS_CSV = "ratings.csv"
 DATA = "data/"
 WATCHLIST_TXT = "data/watchlist.txt"
 
@@ -74,12 +76,38 @@ def _upsert_row(conn: sqlite3.Connection, row: dict):
                 tmdb_id,
                 name,
                 year,
-                add_date
+                add_date,
+                watched,
+                rated
             )
-            VALUES(?, ?, ?, ?, ?)
+            VALUES(?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT DO NOTHING
             """,
-            (_get_id(row), _resolve_tmdb(row["Letterboxd URI"]), row["Name"], row["Year"], row["Date"])
+            (_get_id(row), _resolve_tmdb(row["Letterboxd URI"]), row["Name"], row["Year"], row["Date"], 0, 0)
+        )
+
+
+def _update_name(conn: sqlite3.Connection, row: dict):
+    with conn:
+        conn.execute(
+            """
+            UPDATE Cinemas
+            SET watched = 1
+            WHERE name = ?
+            """,
+            (row["Name"],)
+        )
+
+
+def _update_rating(conn: sqlite3.Connection, row: dict):
+    with conn:
+        conn.execute(
+            """
+            UPDATE Cinemas
+            SET rated = ?
+            WHERE name = ?
+            """,
+            (row["Rating"], row["Name"])
         )
 
 
@@ -87,8 +115,17 @@ def process_watchlist():
     watchlist_csv = os.path.join(MY_PATH, f"{DATA}{WATCHLIST_CSV}")
     with open(watchlist_csv, newline='') as f:
         reader = csv.DictReader(f)
-        rows = list(reader)
+        watchlist_rows = list(reader)
 
+    watched_csv = os.path.join(MY_PATH, f"{DATA}{WATCHED_CSV}")
+    with open(watched_csv, newline='') as f:
+        reader = csv.DictReader(f)
+        watched_rows = list(reader)
+
+    ratings_csv = os.path.join(MY_PATH, f"{DATA}{RATINGS_CSV}")
+    with open(ratings_csv, newline='') as f:
+        reader = csv.DictReader(f)
+        ratings_rows = list(reader)
 
     conn = db.get_conn()
 
@@ -100,14 +137,22 @@ CREATE TABLE IF NOT EXISTS cinemas(
     tmdb_id INT,
     name TEXT,
     year INT,
-    add_date TEXT
+    add_date TEXT,
+    watched INT,
+    rated INT
 )
             """
         )
 
-    for row in rows:
+    for row in watchlist_rows:
         print(f"processing {row['Name']} ({row['Year']})")
         _upsert_row(conn, row)
+
+    for row in watched_rows:
+        _update_name(conn, row)
+
+    for row in ratings_rows:
+        _update_rating(conn, row)
 
     conn.close()
 
@@ -116,8 +161,17 @@ def extract_watchlist():
     zip_file = os.path.join(MY_PATH, ZIP_FILE)
     with zipfile.ZipFile(zip_file, 'r') as zip_ref:
         zip_ref.extract(WATCHLIST_CSV, path=os.path.join(MY_PATH, DATA))
-    os.remove(zip_file)
 
+def extract_watched():
+    zip_file = os.path.join(MY_PATH, ZIP_FILE)
+    with zipfile.ZipFile(zip_file, 'r') as zip_ref:
+        zip_ref.extract(WATCHED_CSV, path=os.path.join(MY_PATH, DATA))
+
+def extract_ratings():
+    zip_file = os.path.join(MY_PATH, ZIP_FILE)
+    with zipfile.ZipFile(zip_file, 'r') as zip_ref:
+        zip_ref.extract(RATINGS_CSV, path=os.path.join(MY_PATH, DATA))
+    os.remove(zip_file)
 
 def download_letterboxd_content():
     '''signs you into letterboxd and then downloads the content'''
@@ -146,6 +200,8 @@ def update_watchlist():
     os.makedirs(DATA, exist_ok=True)
     download_letterboxd_content()
     extract_watchlist()
+    extract_watched()
+    extract_ratings()
     process_watchlist()
 
 if __name__ == "__main__":
